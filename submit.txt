@@ -1,0 +1,5 @@
+/opt/spark/bin/spark-submit \
+--master spark://spark-master:7077 \
+/opt/shared_projects/app.py
+
+spark-submit --master spark://spark-master:7077 /root/projects/app.py
