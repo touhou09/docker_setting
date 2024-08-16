@@ -1,0 +1,49 @@
+# Base image
+FROM ubuntu:22.04
+
+# Set environment variables to prevent interactive installation prompts
+# ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    zsh \
+    wget \
+    git \
+    curl \
+    pip \
+    openjdk-11-jdk \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
+    && apt-get clean
+
+# Set Python 3.11 as the default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+
+# Verify installations
+RUN java -version && python3 --version
+
+# Install oh-my-zsh in a non-interactive mode
+RUN wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
+
+RUN git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+RUN git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+RUN git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search
+RUN git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions
+
+# Install Spark
+RUN wget https://dlcdn.apache.org/spark/spark-3.5.2/spark-3.5.2-bin-hadoop3.tgz \
+    && tar -xzf spark-3.5.2-bin-hadoop3.tgz -C /opt/ \
+    && ln -s /opt/spark-3.5.2-bin-hadoop3 /opt/spark
+
+# Set environment variables
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$SPARK_HOME/bin:$PATH
+
+# Copy custom .zshrc
+COPY .zshrc /root/.zshrc
+
+USER root
+
+# Set zsh as the default shell
+ENTRYPOINT [ "/usr/bin/zsh" ]

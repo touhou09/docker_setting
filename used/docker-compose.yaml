@@ -1,0 +1,43 @@
+version: '3'
+services:
+  ubuntu:
+    build: 
+      context: .
+      dockerfile: dockerfile
+    container_name: ubuntu
+    tty: true
+    networks:
+      - hadoop_spark_net
+
+  spark-master:
+    build:
+      context: .
+      dockerfile: dockerfile.spark
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - PYSPARK_PYTHON=python3.11  # 모든 노드에서 동일한 Python 버전 사용
+      - PYSPARK_DRIVER_PYTHON=python3.11
+    ports:
+      - "8080:8080"
+      - "7077:7077"  # Spark Master 포트를 외부로 노출
+    networks:
+      - hadoop_spark_net
+
+  spark-worker:
+    build:
+      context: .
+      dockerfile: dockerfile.spark
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker  # worker로 설정
+      - PYSPARK_PYTHON=python3.11  # 동일한 Python 버전 사용
+      - PYSPARK_DRIVER_PYTHON=python3.11  # 동일한 Python 버전 사용
+      - SPARK_MASTER_URL=spark://spark-master:7077  # Spark Master의 URL
+      - SPARK_WORKER_CORES=2  # Worker 노드에 할당할 CPU 코어 수
+      - SPARK_WORKER_MEMORY=1G  # Worker 노드에 할당할 메모리
+    networks:
+      - hadoop_spark_net
+
+networks:
+  hadoop_spark_net:

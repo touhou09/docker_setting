@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  ubuntu:
+    build:
+      context: .
+      dockerfile: dockerfile.ubuntu
+    container_name: ubuntu-container
+    tty: true
+    networks:
+      - spark-net
+    volumes:
+      - ./shared-data:/data  # 로컬 디렉토리를 사용하여 파일 동기화
+
+  spark-master:
+    image: bitnami/spark:3.5.2
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    networks:
+      - spark-net
+    volumes:
+      - ./shared-data:/data  # 동일한 로컬 디렉토리 사용
+
+  spark-worker:
+    image: bitnami/spark:3.5.2
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    networks:
+      - spark-net
+    volumes:
+      - ./shared-data:/data  # 동일한 로컬 디렉토리 사용
+
+networks:
+  spark-net:
+    driver: bridge
+
+
+# version: '3.8'
+
+# services:
+#   ubuntu:
+#     build:
+#       context: .
+#       dockerfile: dockerfile.ubuntu
+#     container_name: ubuntu-container
+#     tty: true
+#     networks:
+#       - spark-net
+
+#   spark-master:
+#     image: bitnami/spark:3.5.1
+#     container_name: spark-master
+#     environment:
+#       - SPARK_MODE=master
+#       - SPARK_MASTER_HOST=spark-master
+#     ports:
+#       - "7077:7077"
+#       - "8080:8080"
+#     networks:
+#       - spark-net
+
+#   spark-worker:
+#     image: bitnami/spark:3.5.1
+#     container_name: spark-worker
+#     environment:
+#       - SPARK_MODE=worker
+#       - SPARK_MASTER_URL=spark://spark-master:7077
+#     networks:
+#       - spark-net
+
+# networks:
+#   spark-net:
+#     driver: bridge

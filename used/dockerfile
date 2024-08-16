@@ -1,0 +1,31 @@
+FROM ubuntu:22.04
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    zsh \
+    wget \
+    git \
+    openjdk-11-jdk \
+    curl \
+    && apt-get clean
+
+# Install oh-my-zsh
+RUN wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
+
+# Change default shell to zsh
+RUN chsh -s $(which zsh)
+
+# Install Spark
+RUN wget https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz \
+    && tar -xzf spark-3.5.1-bin-hadoop3.tgz -C /opt/ \
+    && ln -s /opt/spark-3.5.1-bin-hadoop3 /opt/spark
+
+# Set environment variables
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$SPARK_HOME/bin:$PATH
+
+# Copy custom .zshrc
+COPY .zshrc /root/.zshrc
+
+# Set zsh as the default shell
+CMD ["zsh"]
