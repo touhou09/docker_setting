@@ -16,6 +16,8 @@ services:
     environment:
       - SPARK_MODE=master
       - SPARK_MASTER_HOST=spark-master
+      - PYSPARK_PYTHON=/opt/bitnami/python/bin/python3  # Python 버전 설정
+      - PYSPARK_DRIVER_PYTHON=/opt/bitnami/python/bin/python3  # Python 버전 설정
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -30,6 +32,7 @@ services:
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - PYSPARK_PYTHON=/opt/bitnami/python/bin/python3  # Python 버전 설정
     networks:
       - spark-net
     volumes:
